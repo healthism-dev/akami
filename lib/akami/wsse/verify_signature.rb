@@ -128,6 +128,7 @@ module Akami
           'http://www.w3.org/2000/09/xmldsig#sha1' => lambda { OpenSSL::Digest::SHA1.new },
           # SHA 256
           'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' => lambda { OpenSSL::Digest::SHA256.new },
+          'http://www.w3.org/2001/04/xmlenc#sha256' => lambda { OpenSSL::Digest::SHA256.new }, #ehealth puts digest as this url
           # GOST R 34.11-94
           # You need correctly configured gost engine in your system OpenSSL, requires OpenSSL >= 1.0.0
           # see https://github.com/openssl/openssl/blob/master/engines/ccgost/README.gost
