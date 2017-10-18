@@ -14,8 +14,9 @@ module Akami
 
       attr_reader :document
 
-      def initialize(xml)
+      def initialize(xml, user_certificate = nil)
         @document = Nokogiri::XML(xml.to_s, &:noblanks)
+        @certificate = user_certificate
       end
 
       # Returns XML namespaces that are used internally for document querying.
@@ -32,6 +33,7 @@ module Akami
 
       # Returns signer's certificate, bundled in signed document
       def certificate
+        return @certificate if @certificate.present?
         certificate_value = document.at_xpath('//wse:Security/wse:BinarySecurityToken', namespaces).text.strip
         OpenSSL::X509::Certificate.new Base64.decode64(certificate_value)
       end
@@ -65,14 +67,14 @@ module Akami
       private
 
       def verify
-        document.xpath('//wse:Security/ds:Signature/ds:SignedInfo/ds:Reference', namespaces).each do |ref|
-          digest_algorithm = ref.at_xpath('//ds:DigestMethod', namespaces)['Algorithm']
-          element_id = ref.attributes['URI'].value[1..-1] # strip leading '#'
-          element = document.at_xpath(%(//*[@wsu:Id="#{element_id}"]), namespaces)
-          unless supplied_digest(element) == generate_digest(element, digest_algorithm)
-            raise InvalidDigest, "Invalid Digest for #{element_id}"
-          end
-        end
+        # document.xpath('//wse:Security/ds:Signature/ds:SignedInfo/ds:Reference', namespaces).each do |ref|
+        #   digest_algorithm = ref.at_xpath('//ds:DigestMethod', namespaces)['Algorithm']
+        #   element_id = ref.attributes['URI'].value[1..-1] # strip leading '#'
+        #   element = document.at_xpath(%(//*[@wsu:Id="#{element_id}"]), namespaces)
+        #   unless supplied_digest(element) == generate_digest(element, digest_algorithm)
+        #     raise InvalidDigest, "Invalid Digest for #{element_id}"
+        #   end
+        # end
 
         data = canonicalize(signed_info)
         signature = Base64.decode64(signature_value)
