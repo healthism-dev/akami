@@ -14,9 +14,9 @@ module Akami
 
       attr_reader :document
 
-      def initialize(xml, user_certificate = nil)
-        @document = Nokogiri::XML(xml.to_s, &:noblanks)
-        @certificate = user_certificate
+      def initialize(xml, provided_certificate = nil)
+        @document = Nokogiri::XML(xml)
+        @certificate = provided_certificate
       end
 
       # Returns XML namespaces that are used internally for document querying.
